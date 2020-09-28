@@ -34,35 +34,37 @@ class PriceCalculator
   def generate_bill
 
     # Take user input of customer items
-
     puts "Please enter all the items purchased separated by a comma:"
     @customer_items = gets.chomp.split(/,/).map(&:to_s)
-    # quanity = @customer_items.count
-    # puts quantity
 
     items_quantity = Hash.new(0)
     @customer_items.each { |item| items_quantity[item] += 1 }
+    bill_summary = calculate_total_bill(items_quantity)
 
-    puts items_quantity
-
-    # if @purchased_items.any?
-    #   quantity = count_items
-    #   price = calculate_bill(quantity)
-    #   display_bill(price, quantity)
-    # else 
-    #   puts "First add items to generate bill"
-    # end
   end
 
   private
-
-    def count_items
-      @purchased_items.inject(Hash.new(0)) do |quantity, item|
-        quantity[item] += 1
-        quantity
+  def calculate_total_bill(items_quantity)
+    # puts items_quantity
+    summary = Hash.new()
+    items_quantity.each do |product, value|
+      # puts product
+      # puts value
+      # puts "******"
+      selling_price = Product.all[product]
+      sale_details = SaleProduct.all[product]
+      # puts selling_price
+      # puts sale_details
+      if sale_details.empty?
+        cost_price = items_quantity[product] * selling_price
+      else
+        discount_price = (items_quantity[product] / sale_details['units']) * sale_details['price']
+        cost_price =  discount_price +  ((items_quantity[product] % sale_details['units']) * selling_price)
       end
+      summary[product] = cost_price
     end
-
+    return summary
+  end
 
 end
 
